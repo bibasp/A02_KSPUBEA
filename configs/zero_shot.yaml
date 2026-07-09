@@ -1,0 +1,21 @@
+# Zero-shot transfer baseline: pre-trained model applied without fine-tuning.
+name: zero_shot_target
+stage: zero_shot
+seed: 42
+
+data:
+  source: camels
+  camels_root: data
+  target_basin: "11264500"
+  full_period: ["2011-01-01", "2014-12-31"]        # eval window (CAMELS data ends 2014)
+  normalization_period: ["2009-01-01", "2010-12-31"]  # 2 yrs before eval, no leakage
+  sequence_length: 365
+
+model:
+  pretrained_checkpoint: results/checkpoints/pretrain_subset200.pt
+
+training:
+  batch_size: 256
+
+output:
+  metrics_path: results/zero_shot_metrics.json

@@ -1,0 +1,57 @@
+# Walk-forward (rolling-origin) operational evaluation, 2011-2014 (CAMELS data ends 2014).
+name: walk_forward_target
+stage: walk_forward
+seed: 42
+
+data:
+  source: camels
+  camels_root: data
+  target_basin: "11264500"
+  full_period: ["1990-01-01", "2014-12-31"]        # 25 yrs (>=20 needed for RFA thresholds)
+  sequence_length: 365
+
+model:
+  pretrained_checkpoint: results/checkpoints/finetune_conservative.pt
+  hidden_size: 256
+  dropout: 0.4
+
+walk_forward:
+  initial_train_end: "2010-12-31"
+  eval_end: "2014-12-31"
+  refit_every_days: 90
+  online_bias_correction: true
+  # Hold out the last 90 d of each refit window as the early-stopping signal.
+  # The 2026-06-16 published run had val=nan (train-loss stopping only).
+  val_tail_days: 90
+  # Refits may only train on warmup + observed eval data. Omitting this key
+  # lets refits see the full 1990+ record (full_period is that long only for
+  # the >=20-yr threshold climatology) — the earlier published run did, which
+  # silently broke the 2-year data-scarce simulation.
+  refit_train_start: "2009-01-01"
+  fine_tune:
+    head_lr: 1.0e-3
+    lstm_lr: 1.0e-5
+    epochs_head_only: 3
+    epochs_progressive: 0
+    patience: 2
+    unfreeze_fraction: 0.0
+
+evaluation:
+  lead_times: [1, 3, 7]
+  threshold_specs:
+    - { kind: flood, percentile: q95 }
+    - { kind: flood, percentile: q99 }
+    - { kind: drought, percentile: q5 }
+  metrics: [NSE, KGE, PBIAS, AUC, F1, Brier]
+
+xai:
+  enabled: true
+  background_size: 200
+  sample_size: 100
+  seasonal_breakdown: true
+
+output:
+  results_path: results/walk_forward.parquet
+  warnings_path: results/walk_forward_warnings.csv
+  metrics_path: results/walk_forward_metrics.json
+  shap_importance_path: results/shap_global_importance.csv

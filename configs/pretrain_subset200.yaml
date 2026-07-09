@@ -1,0 +1,37 @@
+# Moderate-scope pre-training: 200 hydrologically similar donors, full period.
+# Memory-safe (lazy dataset); intended as a real milestone before full CAMELS.
+name: pretrain_subset200
+stage: pretrain
+seed: 42
+
+data:
+  source: camels
+  camels_root: data
+  target_basin: "11264500"              # real CAMELS snowmelt basin (held out + buffer)
+  exclusion_buffer_km: 50
+  similar_donor_count: 200              # ~200 nearest donors by static-attribute similarity
+  pretrain_period: ["1980-10-01", "2010-09-30"]
+  validation_period: ["2010-10-01", "2014-09-30"]
+  sequence_length: 365
+  num_workers: 0                        # 0 = reliable on Windows; revisit if GPU is starved
+  static_feature_set: full
+
+model:
+  hidden_size: 256
+  dropout: 0.4
+  initial_forget_bias: 3.0
+
+training:
+  batch_size: 256
+  epochs: 30
+  patience: 10
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  clip_grad_norm: 1.0
+
+evaluation:
+  metrics: [NSE, KGE, PBIAS]
+
+output:
+  checkpoint_path: results/checkpoints/pretrain_subset200.pt
+  history_path:    results/history/pretrain_subset200.json

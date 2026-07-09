@@ -1,0 +1,27 @@
+name: finetune_conservative_losgatos_ca_semiarid
+stage: finetune_conservative
+seed: 42
+data:
+  source: camels
+  camels_root: data
+  target_basin: '11224500'
+  sequence_length: 365
+  warmup_period:
+  - '2009-01-01'
+  - '2010-08-31'
+  validation_period:
+  - '2009-09-02'
+  - '2010-12-31'
+model:
+  pretrained_checkpoint: results/checkpoints/pretrain.pt
+  hidden_size: 256
+  dropout: 0.4
+training:
+  batch_size: 64
+  patience: 3
+  head_lr: 0.001
+  weight_decay: 0.0
+  epochs: 5
+output:
+  checkpoint_path: results/multi_target/11224500/checkpoints/finetune_conservative.pt
+  history_path: results/multi_target/11224500/history/finetune_conservative.json

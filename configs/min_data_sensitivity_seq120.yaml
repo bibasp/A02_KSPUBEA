@@ -1,0 +1,31 @@
+# Minimum-data sweep rerun with a 120-day sequence length so that 3/6/12-month
+# warmups produce usable training windows (the seq-365 run yielded 0-1
+# sequences below 24 months and was inconclusive — master report §6.8/§8(C)).
+name: min_data_sensitivity_seq120
+stage: min_data_sensitivity
+seed: 42
+
+data:
+  source: camels
+  camels_root: data
+  target_basin: "11264500"
+  warmup_start: "2009-01-01"
+  warmup_months: [3, 6, 12, 24]
+  validation_period: ["2010-09-01", "2010-12-31"]
+  evaluation_period: ["2011-01-01", "2014-12-31"]
+  sequence_length: 120
+
+model:
+  pretrained_checkpoint: results/checkpoints/pretrain_subset200.pt
+
+training:
+  batch_size: 64
+  epochs: 5
+  patience: 3
+  head_lr: 1.0e-3
+  lstm_lr: 1.0e-5
+  weight_decay: 0.0
+
+output:
+  table_path: results/min_data_sensitivity_seq120.csv
+  summary_path: results/min_data_sensitivity_seq120.json

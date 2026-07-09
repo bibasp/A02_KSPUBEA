@@ -1,0 +1,21 @@
+name: zero_shot_little_nc_southeast_rain
+stage: zero_shot
+seed: 42
+data:
+  source: camels
+  camels_root: data
+  target_basin: 02128000
+  sequence_length: 365
+  full_period:
+  - '2011-01-01'
+  - '2014-12-31'
+  normalization_period:
+  - '2009-01-01'
+  - '2010-12-31'
+model:
+  pretrained_checkpoint: results/checkpoints/pretrain.pt
+training:
+  batch_size: 256
+output:
+  metrics_path: results/multi_target/02128000/zero_shot_metrics.json
+  predictions_path: results/multi_target/02128000/zero_shot_predictions.csv

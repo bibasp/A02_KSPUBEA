@@ -1,0 +1,37 @@
+# Probe run — small donor subset to validate the real CAMELS path and measure
+# per-epoch time / memory before committing to a full pre-training run.
+name: pretrain_probe
+stage: pretrain
+seed: 42
+
+data:
+  source: camels
+  camels_root: data
+  target_basin: "11264500"        # a real CAMELS basin (snowmelt; the config's eval target)
+  exclusion_buffer_km: 50
+  similar_donor_count: 30          # small subset for a fast, low-memory probe
+  pretrain_period: ["1990-10-01", "2005-09-30"]
+  validation_period: ["2005-10-01", "2008-09-30"]
+  sequence_length: 365
+  num_workers: 0                   # 0 avoids Windows multiprocessing spawn overhead
+  static_feature_set: full
+
+model:
+  hidden_size: 256
+  dropout: 0.4
+  initial_forget_bias: 3.0
+
+training:
+  batch_size: 256
+  epochs: 3                        # just enough to measure per-epoch cost
+  patience: 10
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  clip_grad_norm: 1.0
+
+evaluation:
+  metrics: [NSE, KGE, PBIAS]
+
+output:
+  checkpoint_path: results/checkpoints/pretrain_probe.pt
+  history_path:    results/history/pretrain_probe.json

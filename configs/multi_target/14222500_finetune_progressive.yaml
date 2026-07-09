@@ -1,0 +1,30 @@
+name: finetune_progressive_eflewis_wa_pnw_rain
+stage: finetune_progressive
+seed: 42
+data:
+  source: camels
+  camels_root: data
+  target_basin: '14222500'
+  sequence_length: 365
+  warmup_period:
+  - '2009-01-01'
+  - '2010-08-31'
+  validation_period:
+  - '2009-09-02'
+  - '2010-12-31'
+model:
+  pretrained_checkpoint: results/checkpoints/pretrain.pt
+  hidden_size: 256
+  dropout: 0.4
+training:
+  batch_size: 64
+  patience: 3
+  head_lr: 0.001
+  weight_decay: 0.0
+  epochs_head_only: 5
+  epochs_progressive: 5
+  lstm_lr: 1.0e-05
+  unfreeze_fraction: 0.25
+output:
+  checkpoint_path: results/multi_target/14222500/checkpoints/finetune_progressive.pt
+  history_path: results/multi_target/14222500/history/finetune_progressive.json

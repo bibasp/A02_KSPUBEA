@@ -1,0 +1,50 @@
+# Phase 1 — Regional pre-training on the full CAMELS-US dataset.
+name: pretrain_camels_full
+stage: pretrain
+seed: 42
+
+data:
+  source: camels                        # camels | synthetic
+  camels_root: data                      # path to CAMELS root (override at CLI)
+  target_basin: "11264500"              # primary target (Merced R at Happy Isles, Sierra snowmelt)
+  # Full multi-target evaluation set — ALL are held out of the pretrain
+  # (+ buffer around each) so one regional model serves every target without
+  # leakage. Selected 2026-07-02 by completeness (>=99% daily flow 1990-2014,
+  # gap-free 2009-2014) + regime diversity; rationale in
+  # PROJECT_STATUS_AND_CONTINUATION.txt.
+  target_basins:
+    - "11264500"   # Sierra Nevada snowmelt (primary; frac_snow 0.91)
+    - "09107000"   # Taylor R, CO Rockies snowmelt (frac_snow 0.67, 3300 m)
+    - "14222500"   # EF Lewis R, WA — Pacific NW maritime rain (winter precip)
+    - "02128000"   # Little R, NC — humid Southeast rain (frac_snow 0.03)
+    - "01544500"   # Kettle Ck, PA — humid Northeast mixed snow/rain
+    - "11224500"   # Los Gatos Ck, CA — semi-arid flashy/ephemeral (aridity 2.6)
+    - "05507600"   # Lick Ck, MO — continental plains, summer-peak precip
+  exclusion_buffer_km: 50               # exclude basins within this radius of ANY target
+  # optional: restrict to hydrologically similar donors (leave null for full CAMELS)
+  similar_donor_count: null
+  pretrain_period: ["1980-10-01", "2010-09-30"]
+  validation_period: ["2010-10-01", "2014-09-30"]
+  sequence_length: 365
+  num_workers: 4
+  static_feature_set: full              # full | reduced
+
+model:
+  hidden_size: 256
+  dropout: 0.4
+  initial_forget_bias: 3.0
+
+training:
+  batch_size: 256
+  epochs: 50
+  patience: 10
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  clip_grad_norm: 1.0
+
+evaluation:
+  metrics: [NSE, KGE, PBIAS]
+
+output:
+  checkpoint_path: results/checkpoints/pretrain.pt
+  history_path:    results/history/pretrain.json

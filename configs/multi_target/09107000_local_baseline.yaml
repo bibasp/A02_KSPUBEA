@@ -1,0 +1,25 @@
+name: local_baseline_taylor_co_rockies_snow
+stage: local_baseline
+seed: 42
+data:
+  source: camels
+  camels_root: data
+  target_basin: 09107000
+  sequence_length: 365
+  warmup_period:
+  - '2009-01-01'
+  - '2010-08-31'
+  validation_period:
+  - '2009-09-02'
+  - '2010-12-31'
+model:
+  hidden_size: 256
+  dropout: 0.4
+training:
+  batch_size: 64
+  epochs: 50
+  patience: 10
+  head_lr: 0.001
+output:
+  checkpoint_path: results/multi_target/09107000/checkpoints/local_baseline.pt
+  history_path: results/multi_target/09107000/history/local_baseline.json
